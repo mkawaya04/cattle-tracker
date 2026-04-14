@@ -18,16 +18,18 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final softBlue = Colors.lightBlue[50];
-    final softBlueAccent = Colors.lightBlue[100];
+    final darkGreen = const Color(0xFF1B4332);
+    final lightFill = Colors.grey[100];
     final statuses = ['All', 'Healthy', 'Needs Attention', 'Sick'];
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Animal Profiles'),
+        title: const Text('Animal Profiles',
+            style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: softBlueAccent,
+        backgroundColor: darkGreen,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -41,7 +43,7 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
                     hintText: 'Search by name...',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
-                    fillColor: softBlue,
+                    fillColor: lightFill,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50),
                       borderSide: BorderSide.none,
@@ -66,7 +68,7 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
                         decoration: InputDecoration(
                           labelText: 'Breed',
                           filled: true,
-                          fillColor: softBlue,
+                          fillColor: lightFill,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50),
                             borderSide: BorderSide.none,
@@ -87,7 +89,7 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
                         decoration: InputDecoration(
                           labelText: 'Status',
                           filled: true,
-                          fillColor: softBlue,
+                          fillColor: lightFill,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50),
                             borderSide: BorderSide.none,
@@ -111,7 +113,8 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child: CircularProgressIndicator(color: darkGreen));
                 }
 
                 final docs = snapshot.data!.docs;
@@ -145,11 +148,12 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
                     final animalId = data['animalId'] ?? doc.id;
 
                     return Card(
-                      color: softBlue,
+                      color: Colors.white,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.pets),
+                        leading: CircleAvatar(
+                          backgroundColor: darkGreen,
+                          child: const Icon(Icons.pets, color: Colors.white),
                         ),
                         title: Text(name),
                         subtitle: Text('$breed • $age'),
@@ -169,7 +173,7 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
 
                             // ✏ Edit button
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              icon: Icon(Icons.edit, color: darkGreen),
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -207,7 +211,8 @@ class _AnimalProfilesPageState extends State<AnimalProfilesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: softBlueAccent,
+        backgroundColor: darkGreen,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
         onPressed: () {
           Navigator.pushNamed(context, '/add_animal');

@@ -14,6 +14,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool notificationsEnabled = true;
   final TextEditingController _feedbackController = TextEditingController();
+  final darkGreen = const Color(0xFF1B4332);
 
   @override
   void initState() {
@@ -71,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _rateApp() async {
-    final url = Uri.parse('https://example.com/rate'); // replace with real link
+    final url = Uri.parse('https://example.com/rate');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
@@ -113,6 +114,13 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: darkGreen),
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
     );
   }
@@ -123,19 +131,23 @@ class _SettingsPageState extends State<SettingsPage> {
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
       'language': lang,
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Language set to $lang')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Language set to $lang')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final pastelBlue = Colors.blue[50];
-    final softBlue = Colors.blue[200];
+    final lightFill = Colors.grey[100];
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Settings', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: darkGreen,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
@@ -143,11 +155,9 @@ class _SettingsPageState extends State<SettingsPage> {
           Text('Account', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            color: Colors.white,
             child: ListTile(
-              leading: const Icon(Icons.person),
+              leading: Icon(Icons.person, color: darkGreen),
               title: Text(user?.displayName ?? 'Unknown User'),
               subtitle: Text(user?.email ?? ''),
               trailing: TextButton(
@@ -157,6 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     Navigator.of(context).pushReplacementNamed('/login');
                   }
                 },
+                style: TextButton.styleFrom(foregroundColor: darkGreen),
                 child: const Text('Log Out'),
               ),
             ),
@@ -168,16 +179,17 @@ class _SettingsPageState extends State<SettingsPage> {
             title: const Text('Enable Notifications'),
             value: notificationsEnabled,
             onChanged: (val) => _updateNotifications(val),
+            activeColor: darkGreen,
           ),
           const SizedBox(height: 24),
           Text('Language', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           ListTile(
-            leading: const Icon(Icons.language),
+            leading: Icon(Icons.language, color: darkGreen),
             title: const Text('App Language'),
             subtitle: const Text('Tap to change'),
             trailing: IconButton(
-              icon: const Icon(Icons.edit),
+              icon: Icon(Icons.edit, color: darkGreen),
               onPressed: _showLanguageDialog,
             ),
           ),
@@ -185,15 +197,13 @@ class _SettingsPageState extends State<SettingsPage> {
           Text('Feedback', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('We’d love to hear your thoughts!'),
+                  const Text('We\'d love to hear your thoughts!'),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _feedbackController,
@@ -201,9 +211,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     decoration: InputDecoration(
                       hintText: 'Share your feedback...',
                       filled: true,
-                      fillColor: pastelBlue,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      fillColor: lightFill,
+                      border: const OutlineInputBorder(
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -212,14 +221,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: softBlue,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
                       onPressed: _submitFeedback,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: darkGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                       child: const Text('Submit'),
                     ),
                   ),
@@ -234,12 +241,12 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 8),
           ListTile(
-            leading: const Icon(Icons.star_rate),
+            leading: Icon(Icons.star_rate, color: darkGreen),
             title: const Text('Rate the App'),
             onTap: _rateApp,
           ),
           ListTile(
-            leading: const Icon(Icons.share),
+            leading: Icon(Icons.share, color: darkGreen),
             title: const Text('Share the App'),
             onTap: _shareApp,
           ),

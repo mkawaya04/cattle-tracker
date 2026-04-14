@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'services/monitoring_service.dart';
 
 // Screens
 import 'screens/signup_page.dart';
@@ -58,13 +59,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkGreen = const Color(0xFF1B4332);
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Cattle Tracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        primarySwatch: Colors.pink,
+        primaryColor: darkGreen,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: darkGreen,
+          primary: darkGreen,
+        ),
+        cardTheme: const CardThemeData(
+          color: Colors.white, // Force all cards to be white
+        ),
         scaffoldBackgroundColor: Colors.white,
         textTheme: const TextTheme(
           titleLarge: TextStyle(fontWeight: FontWeight.bold),
@@ -72,9 +82,9 @@ class MyApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.pink[50],
+          fillColor: Colors.grey[100],
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -131,12 +141,14 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkGreen = const Color(0xFF1B4332);
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator(color: darkGreen)),
           );
         }
         if (snapshot.hasError) {
@@ -147,6 +159,11 @@ class AuthGate extends StatelessWidget {
         if (!snapshot.hasData) {
           return const LoginPage(); // Show login if not signed in
         }
+
+        // ✅ Start monitoring for automatic alerts when user logs in
+        MonitoringService.startMonitoring();
+        debugPrint('✅ Automatic alert monitoring activated');
+
         return DashboardPage(); // Show dashboard if signed in
       },
     );

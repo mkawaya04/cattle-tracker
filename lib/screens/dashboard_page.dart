@@ -35,9 +35,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final softBlue = Colors.lightBlue[50];
-    final softBlueAccent = Colors.lightBlue[100];
-    final softPurple = Colors.blue[100];
+    final darkGreen = const Color(0xFF1B4332);
+    final lightGreen = const Color(0xFF2D6A4F);
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final cardColor =
+        const Color(0xFFFEFEFE); // Almost pure white for all cards
 
     return Scaffold(
       body: Row(
@@ -45,7 +47,7 @@ class _DashboardPageState extends State<DashboardPage> {
           // Sidebar
           Container(
             width: 200,
-            color: softBlue,
+            color: darkGreen,
             child: Column(
               children: [
                 const SizedBox(height: 120),
@@ -53,26 +55,32 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: ListView(
                     children: [
                       ListTile(
-                        leading: Icon(Icons.pets, color: Colors.blue[300]),
-                        title: const Text('Animal Profiles'),
+                        leading: const Icon(Icons.pets, color: Colors.white),
+                        title: const Text('Animal Profiles',
+                            style: TextStyle(color: Colors.white)),
                         onTap: () => navigateTo(0),
                       ),
                       ListTile(
-                        leading: Icon(Icons.analytics, color: Colors.blue[300]),
-                        title: const Text('Animal Analytics'),
+                        leading:
+                            const Icon(Icons.analytics, color: Colors.white),
+                        title: const Text('Animal Analytics',
+                            style: TextStyle(color: Colors.white)),
                         onTap: () => navigateTo(1),
                       ),
                       ListTile(
-                        leading: Icon(
+                        leading: const Icon(
                           Icons.notification_important,
-                          color: Colors.blue[300],
+                          color: Colors.white,
                         ),
-                        title: const Text('Alerts'),
+                        title: const Text('Alerts',
+                            style: TextStyle(color: Colors.white)),
                         onTap: () => navigateTo(2),
                       ),
                       ListTile(
-                        leading: Icon(Icons.settings, color: Colors.blue[300]),
-                        title: const Text('Settings'),
+                        leading:
+                            const Icon(Icons.settings, color: Colors.white),
+                        title: const Text('Settings',
+                            style: TextStyle(color: Colors.white)),
                         onTap: () => navigateTo(3),
                       ),
                     ],
@@ -91,13 +99,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  color: softBlueAccent,
+                  color: lightGreen,
                   child: const Center(
                     child: Text(
                       'Animal Tracker Dashboard',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -116,6 +125,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('animals')
+                            .where('ownerId', isEqualTo: userId)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
@@ -123,7 +133,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               title: 'Registered Animals',
                               value: '...',
                               icon: Icons.pets,
-                              color: softBlueAccent,
+                              color: cardColor,
                             );
                           }
                           final count = snapshot.data!.docs.length;
@@ -131,7 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             title: 'Registered Animals',
                             value: count.toString(),
                             icon: Icons.pets,
-                            color: softBlueAccent,
+                            color: cardColor,
                           );
                         },
                       ),
@@ -156,7 +166,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             title: 'Live Location',
                             value: status,
                             icon: Icons.location_on,
-                            color: softPurple,
+                            color: cardColor,
                           );
                         },
                       ),
@@ -166,10 +176,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('alerts')
-                            .where(
-                              'ownerId',
-                              isEqualTo: FirebaseAuth.instance.currentUser!.uid,
-                            )
+                            .where('ownerId', isEqualTo: userId)
+                            .where('resolved', isEqualTo: false)
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
@@ -177,7 +185,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               title: 'Alerts',
                               value: '...',
                               icon: Icons.warning,
-                              color: softBlueAccent,
+                              color: cardColor,
                             );
                           }
                           final count = snapshot.data!.docs.length;
@@ -185,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             title: 'Alerts',
                             value: count.toString(),
                             icon: Icons.warning,
-                            color: softBlueAccent,
+                            color: cardColor,
                           );
                         },
                       ),

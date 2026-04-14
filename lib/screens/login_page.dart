@@ -57,11 +57,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final pastelBlue = Colors.blue[50];
-    final softBlue = Colors.blue[200];
+    final darkGreen = const Color(0xFF1B4332);
+    final lightFill = Colors.grey[100];
 
     return Scaffold(
-      backgroundColor: pastelBlue,
+      backgroundColor: Colors.grey[50],
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.black.withOpacity(0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -86,10 +86,8 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Text(
                     'Welcome Back',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: softBlue),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: darkGreen, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -98,10 +96,13 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       filled: true,
-                      fillColor: pastelBlue,
+                      fillColor: lightFill,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     validator: (value) => value == null || value.isEmpty
@@ -115,10 +116,13 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       filled: true,
-                      fillColor: pastelBlue,
+                      fillColor: lightFill,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     validator: (value) => value == null || value.isEmpty
@@ -130,7 +134,8 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: softBlue,
+                        backgroundColor: darkGreen,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -147,6 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, '/signup');
                     },
+                    style: TextButton.styleFrom(foregroundColor: darkGreen),
                     child: const Text("Don't have an account? Sign up"),
                   ),
                 ],

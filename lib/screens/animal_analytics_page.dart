@@ -18,15 +18,17 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final softBlue = Colors.lightBlue[50];
-    final softBlueAccent = Colors.lightBlue[100];
+    final darkGreen = const Color(0xFF1B4332);
+    final lightFill = Colors.grey[100];
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Animal Analytics'),
+        title: const Text('Animal Analytics',
+            style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: softBlueAccent,
+        backgroundColor: darkGreen,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -35,7 +37,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(color: darkGreen));
           }
 
           final animals = snapshot.data!.docs;
@@ -104,7 +106,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: softBlue,
+                          color: lightFill,
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: DropdownButtonHideUnderline(
@@ -131,12 +133,12 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
 
                       // Temperature Chart
                       if (selectedAnimalId != null)
-                        _buildTemperatureChart(selectedAnimalId!)
+                        _buildTemperatureChart(selectedAnimalId!, darkGreen)
                       else
                         Container(
                           height: 250,
                           decoration: BoxDecoration(
-                            color: softBlue,
+                            color: lightFill,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Center(
@@ -174,7 +176,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
                               icon: Icons.pets,
                               title: 'Total Animals',
                               value: totalAnimals.toString(),
-                              color: Colors.blue,
+                              color: darkGreen,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -216,7 +218,8 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
           .snapshots(),
       builder: (context, locationSnapshot) {
         if (!locationSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+              child: CircularProgressIndicator(color: const Color(0xFF1B4332)));
         }
 
         final locations = locationSnapshot.data!.docs;
@@ -273,7 +276,9 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
               .snapshots(),
           builder: (context, animalSnapshot) {
             if (!animalSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                      color: const Color(0xFF1B4332)));
             }
 
             final animals = animalSnapshot.data!.docs;
@@ -285,7 +290,11 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
             }
 
             List<Marker> markers = [];
-            bool firstMarker = true;
+
+            // Calculate average position for center
+            double totalLat = 0;
+            double totalLng = 0;
+            int validLocationCount = 0;
 
             latestLocations.forEach((animalId, locationDoc) {
               final locationData = locationDoc.data() as Map<String, dynamic>;
@@ -297,25 +306,54 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
                 final name = animalData?['name'] ?? 'Unknown';
                 final status = animalData?['status'] ?? 'Unknown';
 
-                // Set first animal as center
-                if (firstMarker) {
-                  center = LatLng(lat, lng);
-                  firstMarker = false;
-                }
+                // Calculate center position
+                totalLat += lat;
+                totalLng += lng;
+                validLocationCount++;
 
                 markers.add(
                   Marker(
                     point: LatLng(lat, lng),
-                    width: 40,
-                    height: 40,
+                    width: 80,
+                    height: 60,
                     child: GestureDetector(
                       onTap: () {
                         _showAnimalInfo(context, name, status);
                       },
-                      child: Icon(
-                        Icons.location_on,
-                        size: 40,
-                        color: status == 'Healthy' ? Colors.green : Colors.red,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 32,
+                            color:
+                                status == 'Healthy' ? Colors.green : Colors.red,
+                            shadows: const [
+                              Shadow(
+                                blurRadius: 3,
+                                color: Colors.black45,
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.black26),
+                            ),
+                            child: Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -323,11 +361,17 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
               }
             });
 
+            // Set center to average of all animal positions
+            if (validLocationCount > 0) {
+              center = LatLng(
+                  totalLat / validLocationCount, totalLng / validLocationCount);
+            }
+
             return FlutterMap(
               mapController: mapController,
               options: MapOptions(
                 initialCenter: center,
-                initialZoom: 13.0,
+                initialZoom: markers.length > 1 ? 14.0 : 15.0,
               ),
               children: [
                 TileLayer(
@@ -344,6 +388,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
   }
 
   void _showAnimalInfo(BuildContext context, String name, String status) {
+    final darkGreen = const Color(0xFF1B4332);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -352,6 +397,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: darkGreen),
             child: const Text('Close'),
           ),
         ],
@@ -359,7 +405,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
     );
   }
 
-  Widget _buildTemperatureChart(String animalId) {
+  Widget _buildTemperatureChart(String animalId, Color darkGreen) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('temperatures')
@@ -367,7 +413,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: darkGreen));
         }
 
         final readings = snapshot.data!.docs;
@@ -376,7 +422,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
           return Container(
             height: 250,
             decoration: BoxDecoration(
-              color: Colors.lightBlue[50],
+              color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Center(
@@ -427,7 +473,7 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
           height: 250,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.lightBlue[50],
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(12),
           ),
           child: LineChart(
@@ -480,12 +526,12 @@ class _AnimalAnalyticsPageState extends State<AnimalAnalyticsPage> {
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
-                  color: Colors.blue,
+                  color: darkGreen,
                   barWidth: 3,
                   dotData: FlDotData(show: true),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: Colors.blue.withOpacity(0.3),
+                    color: darkGreen.withOpacity(0.3),
                   ),
                 ),
               ],
